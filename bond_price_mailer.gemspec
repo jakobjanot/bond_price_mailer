@@ -8,8 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = BondPriceMailer::VERSION
   spec.authors       = ['Jakob Kofoed Janot']
   spec.email         = ['jakob@janot.dk']
-  spec.summary       = 'TODO: Write a short summary. Required.'
-  spec.description   = 'TODO: Write a longer description. Optional.'
+  spec.summary       = 'Mailer that gets the latest bond prices'
   spec.homepage      = ''
   spec.license       = 'MIT'
 
