@@ -14,10 +14,6 @@ OptionParser.new do |opts|
   opts.on('-pISIN', '--papers=ISINS', 'Paper ISIN list [ISINS]') do |isins|
     options[:isins] = isins.gsub(/ /, '').split(/,/)
   end
-  options[:interval] = nil
-  opts.on('-iINTERVAL', '--interval=INTERVAL', 'Interval between scrapes INTERVAL') do |interval|
-    options[:interval] = interval
-  end
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
     exit
@@ -27,10 +23,4 @@ end.parse!
 puts "Email receivers: #{options[:recepients].join(', ')}"
 puts "Paper ISINs: #{options[:isins].join(', ')}"
 
-if options[:interval]
-  puts "Runs every: #{options[:interval]}"
-  BondPriceMailer.run_every(options[:interval], options[:recepients],
-                            options[:isins])
-else
-  BondPriceMailer.run(options[:recepients], options[:isins])
-end
+BondPriceMailer.run(options[:recepients], options[:isins])

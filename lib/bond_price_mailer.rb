@@ -1,5 +1,3 @@
-require 'rufus-scheduler'
-require 'pry'
 require 'logger'
 
 require_relative 'bond_price_mailer/version'
@@ -7,10 +5,6 @@ require_relative 'bond_price_mailer/mail'
 require_relative 'bond_price_mailer/scraper'
 
 module BondPriceMailer
-  def self.run_every(interval, receivers_emails, isins)
-    Rufus::Scheduler.new.every(interval) { run(receivers_emails, isins) }
-  end
-
   def self.run(receivers_emails, isins)
     papers = Scraper.papers(isins)
     logger.info papers.map(&:to_s) if logger
