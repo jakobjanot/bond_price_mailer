@@ -7,7 +7,7 @@ require_relative 'bond_price_mailer/scraper'
 module BondPriceMailer
   def self.run(receivers_emails, isins)
     papers = Scraper.papers(isins)
-    logger.info papers.map(&:to_s) if logger
+    log papers.map(&:to_s)
 
     receivers_emails.each do |email|
       Mail.deliver do
@@ -19,10 +19,9 @@ module BondPriceMailer
     end
   end
 
-  def self.logger
-    @logger ||= begin
-      return nil unless ENV['LOG_FILE']
-      Logger.new(ENV['LOG_FILE'])
-    end
+  def self.log(msg)
+    log_file = ENV['LOG_FILE']
+    return unless log_file
+    File.open(log_file, 'a') { |f| f.puts msg }
   end
 end
