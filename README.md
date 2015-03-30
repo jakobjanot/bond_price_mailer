@@ -1,31 +1,5 @@
-# BondPriceMailer
-
-TODO: Write a gem description
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'bond_price_mailer'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install bond_price_mailer
+# Bond Price Mailer
 
 ## Usage
 
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it ( https://github.com/[my-github-username]/bond_price_mailer/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+LOG_FILE=<log-file> EMAIL_FROM=<email-from> GMAIL_USERNAME=<gmail-username> GMAIL_DOMAIN=<gmail-domain> GMAIL_PASSWORD=<gmail-password> bundle exec bin/bond-price-mailer -r<recepient1-mail>,<recepient2-mail> -pDK0002000348,DK0009506024 -i<interval>
