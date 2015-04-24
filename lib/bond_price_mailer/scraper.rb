@@ -2,13 +2,21 @@ require 'open-uri'
 require 'rexml/document'
 
 module BondPriceMailer
-  Paper = Struct.new(:isin, :name, :price, :date) do
+  Paper = Struct.new(:isin, :name, :close_price, :open_price,
+                     :high_price, :low_price, :average_price, :link, :date) do
     def short
       "#{name}: #{price}"
     end
 
     def long
-      "Navn: #{name}\nISIN: #{isin}\nKurs: #{price}\nDato: #{date_formatted}"
+      "Navn: <a href='#{link}'>#{name}</a>\n" \
+      "ISIN: #{isin}\n" \
+      "Luk : #{close_price}\n" \
+      "Åbn : #{open_price}\n" \
+      "Gnms: #{average_price}\n" \
+      "Høj : #{high_price}\n" \
+      "Lav : #{low_price}\n" \
+      "Dato: #{date_formatted}\n"
     end
 
     def date_formatted
@@ -21,22 +29,27 @@ module BondPriceMailer
   end
 
   class Scraper
-    def self.papers(isins)
-      doc = tier_list
-
-      isins.map do |isin|
-        paper = REXML::XPath.first(doc, ".//Papir[isin/text() = '#{isin}']")
+    def self.papers(instruments)
+      doc = bonds(instruments)
+      instruments.map do |instrument|
+        paper = REXML::XPath.first(doc, ".//inst[id/text() = '#{instrument}']")
         Paper.new(
-        REXML::XPath.first(paper, './isin/text()').to_s,
-        REXML::XPath.first(paper, './navn/text()').to_s,
-        REXML::XPath.first(paper, './kurs/text()').to_s.to_f,
-        Date.today
+          REXML::XPath.first(paper, './isin/text()').to_s,    # isin
+          REXML::XPath.first(paper, './nm/text()').to_s,      # name
+          REXML::XPath.first(paper, './cp/text()').to_s.to_f, # close_price
+          REXML::XPath.first(paper, './op/text()').to_s.to_f, # open_price
+          REXML::XPath.first(paper, './hp/text()').to_s.to_f, # high_price
+          REXML::XPath.first(paper, './lp/text()').to_s.to_f, # low_price
+          "http://www.nasdaqomxnordic.com/bonds/denmark/microsite?Instrument=#{instrument}",
+          Date.today
         )
       end
     end
 
-    def self.tier_list
-      REXML::Document.new(open('http://dataservice.nationalbanken.dk/data/tierliste/tierlistedkk.xml')).root
+    def self.bonds(instruments)
+      inst_ids = instruments.map { |i| i.strip }.join(",")
+      url = "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=GetInstrument&Instrument=#{inst_ids}&inst__a=0,1,2,37,20,21,23,24,35,36,39,10&Exception=false"
+      REXML::Document.new(open(URI.parse(url))).root
     end
   end
 end
