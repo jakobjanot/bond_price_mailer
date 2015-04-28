@@ -10,14 +10,15 @@ module BondPriceMailer
     end
 
     def long
-      "Navn: <a href='#{link}'>#{name}</a>\n" \
+      "Navn: #{name}\n" \
       "ISIN: #{isin}\n" \
       "Luk : #{close_price}\n" \
       "Åbn : #{open_price}\n" \
       "Gnms: #{average_price}\n" \
       "Høj : #{high_price}\n" \
       "Lav : #{low_price}\n" \
-      "Dato: #{date_formatted}\n"
+      "Dato: #{date_formatted}\n" \
+      "Link: #{link}\n"
     end
 
     def date_formatted
