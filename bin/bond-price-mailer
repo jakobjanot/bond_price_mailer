@@ -21,6 +21,6 @@ OptionParser.new do |opts|
 end.parse!
 
 puts "Email receivers: #{options[:recepients].join(', ')}"
-puts "Paper ISINs: #{options[:isins].join(', ')}"
+puts "Instrument id's: #{options[:isins].join(', ')}"
 
 BondPriceMailer.run(options[:recepients], options[:isins])

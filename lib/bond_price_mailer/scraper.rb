@@ -2,15 +2,25 @@
 
 require 'open-uri'
 require 'rexml/document'
+require 'pry'
 
 module BondPriceMailer
-  Paper = Struct.new(:isin, :name, :price, :date) do
+  Paper = Struct.new(:isin, :name, :close_price, :open_price,
+                     :high_price, :low_price, :average_price, :link, :date) do
     def short
-      "#{name}: #{price}"
+      "#{name}: #{close_price}"
     end
 
     def long
-      "Navn: #{name}\nISIN: #{isin}\nKurs: #{price}\nDato: #{date_formatted}"
+      "Navn: #{name}\n" \
+      "ISIN: #{isin}\n" \
+      "Luk : #{close_price}\n" \
+      "Åbn : #{open_price}\n" \
+      "Gnms: #{average_price}\n" \
+      "Høj : #{high_price}\n" \
+      "Lav : #{low_price}\n" \
+      "Dato: #{date_formatted}\n" \
+      "Link: #{link}\n"
     end
 
     def date_formatted
@@ -23,22 +33,24 @@ module BondPriceMailer
   end
 
   class Scraper
-    def self.papers(isins)
-      doc = tier_list
-
-      isins.map do |isin|
-        paper = REXML::XPath.first(doc, ".//Papir[isin/text() = '#{isin}']")
-        Paper.new(
-        REXML::XPath.first(paper, './isin/text()').to_s,
-        REXML::XPath.first(paper, './navn/text()').to_s,
-        REXML::XPath.first(paper, './kurs/text()').to_s.to_f,
-        Date.today
+    def self.papers(instruments)
+      papers = []
+      REXML::XPath.each(bonds(instruments), './/inst') do |inst|
+        id = inst.attributes['id']
+        papers << Paper.new(
+          *(inst.attributes.values_at('isin', 'nm', 'cp', 'op', 'av', 'hp', 'lp')),
+          "http://www.nasdaqomxnordic.com/bonds/denmark/microsite?Instrument=#{id}",
+          Date.today
         )
       end
+      papers
     end
 
-    def self.tier_list
-      REXML::Document.new(open('http://dataservice.nationalbanken.dk/data/tierliste/tierlistedkk.xml')).root
+    USER_AGENT = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
+    def self.bonds(instruments)
+      inst_ids = instruments.map(&:strip).join(',')
+      uri = URI.parse "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=GetInstrument&Instrument=#{inst_ids}"
+      REXML::Document.new(uri.open('User-Agent' => USER_AGENT).read.to_s).root
     end
   end
 end
