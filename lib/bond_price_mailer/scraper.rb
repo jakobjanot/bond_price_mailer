@@ -1,5 +1,6 @@
 require 'open-uri'
 require 'rexml/document'
+require 'pry'
 
 module BondPriceMailer
   Paper = Struct.new(:isin, :name, :close_price, :open_price,
@@ -31,8 +32,9 @@ module BondPriceMailer
   class Scraper
     def self.papers(instruments)
       doc = bonds(instruments)
+      binding.pry
       instruments.map do |instrument|
-        paper = REXML::XPath.first(doc, ".//inst[id/text() = '#{instrument}']")
+        paper = REXML::XPath.first(doc, "inst[id/text() = '#{instrument}']")
         Paper.new(
           REXML::XPath.first(paper, './isin/text()').to_s,    # isin
           REXML::XPath.first(paper, './nm/text()').to_s,      # name
@@ -46,10 +48,11 @@ module BondPriceMailer
       end
     end
 
+    USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0"
     def self.bonds(instruments)
       inst_ids = instruments.map { |i| i.strip }.join(",")
-      url = "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=GetInstrument&Instrument=#{inst_ids}&inst__a=0,1,2,37,20,21,23,24,35,36,39,10&Exception=false"
-      REXML::Document.new(open(URI.parse(url))).root
+      uri = URI.parse "http://www.nasdaqomxnordic.com/webproxy/DataFeedProxy.aspx?SubSystem=Prices&Action=GetInstrument&Instrument=#{inst_ids}"
+      REXML::Document.new(uri.open("User-Agent" => USER_AGENT).read.to_s).root
     end
   end
 end
