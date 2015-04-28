@@ -38,7 +38,7 @@ module BondPriceMailer
       REXML::XPath.each(bonds(instruments), './/inst') do |inst|
         id = inst.attributes['id']
         papers << Paper.new(
-          *(inst.attributes.values_at('isin', 'nm', 'cp', 'op', 'av', 'hp', 'lp')),
+          *(inst.attributes.values_at('isin', 'nm', 'cp', 'op', 'hp', 'lp', 'ap')),
           "http://www.nasdaqomxnordic.com/bonds/denmark/microsite?Instrument=#{id}",
           Date.today
         )
